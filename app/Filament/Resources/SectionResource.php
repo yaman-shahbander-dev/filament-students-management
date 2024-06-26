@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Get;
+use Illuminate\Validation\Rules\Unique;
 
 class SectionResource extends Resource
 {
@@ -22,12 +24,17 @@ class SectionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Academic Management';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Select::make('class_id')->relationship(name: 'class', titleAttribute: 'name'),
                 TextInput::make('name')
+                    ->unique(ignoreRecord: true, modifyRuleUsing: function (Get $get, Unique $rule) {
+                        return $rule->where('class_id', $get('class_id'));
+                    })
             ]);
     }
 
@@ -36,7 +43,11 @@ class SectionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('class.name')->badge()
+                TextColumn::make('class.name')
+                    ->badge(),
+                TextColumn::make('students_count')
+                    ->counts('students')
+                    ->badge()
             ])
             ->filters([
                 //
