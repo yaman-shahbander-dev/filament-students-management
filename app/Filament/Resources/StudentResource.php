@@ -23,6 +23,7 @@ use Filament\Forms\Get;
 use Filament\Tables\Actions\BulkAction;
 use Maatwebsite\Excel\Facades\Excel;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Actions\Action;
 
 class StudentResource extends Resource
 {
@@ -113,6 +114,12 @@ class StudentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('download pdf')->url(function (Student $student) {
+                    return route('student.invoice.generate', $student->id);
+                }),
+                Action::make('Qr Code')->url(function (Student $student) {
+                    return static::getUrl('qrcode', ['record' => $student]);
+                })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -140,6 +147,7 @@ class StudentResource extends Resource
             'index' => Pages\ListStudents::route('/'),
             'create' => Pages\CreateStudent::route('/create'),
             'edit' => Pages\EditStudent::route('/{record}/edit'),
+            'qrcode' => Pages\GenerateQrCode::route('/{record}/qrcode'),
         ];
     }
 }
